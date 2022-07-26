@@ -1,0 +1,135 @@
+server
+Views: 
+- Articles
+    title
+    date
+    description
+- New article
+- View article
+- Edit article
+- Delete article 
+Stored in routes folder
+Routes:
+- Article.js
+    all routes will be inside articles.js
+
+pass all articles to index 
+placeholder: const articles: 
+res.render('index', {articles: articles}) articles view being passed to articles. at index.ejs place access to variable called articles to iterate over articles
+views 
+
+create cards for each article to display on index page 
+each card has: card margins, card article title, card date subtitle, card text article description
+
+work on adding new articles before adding read more, edit and delete buttons 
+
+connect new.ejs view to articles.ejs new route :5000/articles/new 
+
+when an article posts, route to / 
+
+create articles/ _form_fields.ejs _ indicates partial view and not a full view 
+
+new.ejs - <%- allows to render actual html instead of just text and will render exact html inside of _form_fields.ejs
+
+include _form_fields.ejs into new since edit and new are same fields 
+
+form fields are title, description, markdown 
+each div box is of class="form-group" 
+each input is of calss="form-control"
+<a href="/" class="btn btn-secondary">Cancel</a> //gives grey color
+<button type="submit" class="btn btn-primary mt-2">Save</button> //gives 
+
+add const mongoose = require("mongoose"); //mongoose.connect("mongodb://localhost/blog"); to server.js 
+
+create models > article.js 
+create mongoose.schema with record schema. this maps the input fields to the schema so mdb can store each insert operation 
+
+add Article = require('./../models/article) to articles.js to import schema 
+
+on articles.js add .post route and add different options. to add options from our form in articles.js we need to tell express how to access them.
+
+on server.js add 
+app.use(express.urlencoded({extended: false })
+is saying we can access all params from article form inside the article route at articles.js 
+
+on articles.js post route, created const of article then tried tro reassign it at the try block. changed to let so it could 
+
+next create route for .get('/:id') with res.send(req.params.id)
+
+36:54 new.ejs reference error for _form_fields line 3 input article is not defined 
+
+
+<div class="text-muted mb-2">
+            <%= article.createdAt.toLocaleDateString() %>
+        </div>
+
+
+add route/:id and res.render('articles/show', {article: article}) so that show.ejs can reference article.id at href 
+add const of article.findById and ref (req.params.id)
+check article form not empty
+make router.get async so it awaits article that's not null then display that ID 
+in articles.js 
+router.get("/:id", async (req, res) => {
+  const article = await Article.findById(req.params.id);
+  if (article == null) res.redirect("/");
+  res.render("articles/show", { article: article });
+});
+
+on show.ejs
+add h1 that refs <%= article.title %> and toLocaleDateString
+add button in href "/" to all articles 
+and <a href="/articles/edit/<%= article.id %>" to Edit article 
+
+next render out the markdown as plain markdown 
+later comeback and render it as html
+add <%= article.markdown %> and wrap in div to have it's own line
+
+next remove test data const articles in server.js and add in article model
+
+add
+const Article = require('./models/article)
+in app.get { call const article = Article.find()} //will get all articles
+and make async so app.get('/', async (req, res) =>{const article = await Article...})
+
+add .sort to sort by createdAt 
+
+next replace ugly recordID in URL with a 'slug' that replaces uggo id with something like article title. To do this modify models folder
+import following libraries 
+marked allows to turn markdown into html 
+slugify allows to convert something like title into url friendly slug to use instead of the record ID 
+
+add slug attributes: string, req=true, unique=true 
+slug must be unique. so do schema.pre(validate('Article', articleSchema))
+
+  articleSchema.pre('validate', function() {
+    if (this.title) {
+      this.slug = slugify(this.title, { lower: true, strict: true })
+    }
+
+force lower case, force slugify to remove chars that don't fit in URL. ex has : colon that is removed 
+
+this allows to create slug from title every single time we validate a model 
+
+back on server.js replace '/:id' with '/slug' and instead of findById just call Article.find({ slug: req.params.slug })
+
+mod this for new article route as well. 
+router.post('/'.... res.redirect('/articles/${article.slug}))
+
+also add slug to index.ejs to find articles by slug 
+
+<a href="articles/<%= article.slug %>"
+
+articles created before slugify return cannot get because looking for slug not id. 
+
+need to delete the non-slugged records
+links only allow to get
+forms only allow post/get 
+to use delete as method for our form need to use library called method override 
+
+add const methodOverride = require('method-override') and app.use(methodOverride('_method')) so whenever we set param _method in any type of forms this will override the method 
+so if we pass _method of delete will allow us to call this deleted router 
+
+if use anchor tag to delete, that is a get route and when google crawls your site it will click on every single link tag. If using a link tag for delete, every single time google indexes your site they will delete everything in your database. That's not good. Instead, use a form 
+The form has an action, /articles/<%= article.id %> include method override by saying 
+form action="/articles/<%= article.id %>?_method=DELETE" method="POST"><BTN submit - danger "Delete"</btn>
+

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://bootswatch.com/5/slate/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsByYous</title>
+</head>
+<body>
+    <div class="container">
+        <!-- margin spacing on bottom -->
+        <h1 class="mb-4">Yous Articles</h1>
+        <!-- link to new article -->
+        <a href="/articles/new" class="btn btn-success">New Yous Article</a>
+
+        <% articles.forEach(article => { %>
+        <div class="card mt-1">
+            <div class="card-body">
+                <h4 class="card-title"><%= article.title %></h4>
+                    <div class="card-subtitle text-muted mb-2">
+                        <%= article.createdAt.toLocaleDateString() %>
+                    <div class="card-text mb-1"><%= article.description %></div>
+                    <div>
+                        <a href="articles/<%= article.slug %>" class="btn btn-primary">Read More</a>
+                        <form action="/articles/<%= article.id %>?_method=DELETE" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                    </div>
+                
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</body>
+</html>
