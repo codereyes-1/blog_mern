@@ -99,6 +99,8 @@ marked allows to turn markdown into html
 slugify allows to convert something like title into url friendly slug to use instead of the record ID 
 
 add slug attributes: string, req=true, unique=true 
+
+whatever is passed to articleSchema will be validated with this function before CRUD operations are executed. Doesn't pass validation, doesn't get executed 
 slug must be unique. so do schema.pre(validate('Article', articleSchema))
 
   articleSchema.pre('validate', function() {
@@ -133,3 +135,25 @@ if use anchor tag to delete, that is a get route and when google crawls your sit
 The form has an action, /articles/<%= article.id %> include method override by saying 
 form action="/articles/<%= article.id %>?_method=DELETE" method="POST"><BTN submit - danger "Delete"</btn>
 
+<a href="articles/edit/<%= article.slug %>" class="btn btn-info">Edit</a>
+
+class="d-inline"
+
+
+When converting blog markdown to html, must sanitize html so ppl can't add malicious code into our markdown and actually run javascript on ppl's computers. So sanitize it so ppl can't just write any html they want and it will run 
+
+Add these libraries for that 
+purify sanitizes, jsdom required to run dompurify
+npm i dompurify jsdom 
+
+jsdom added as { JSDOM } in brackets because we only want this portion of what require('jsdom') will return 
+
+So now that we have marked to convert markdown to html
+and dompurify that sanitized our html, create new column for sanitized html 
+in article.js 
+
+/8 if (this.markdown) {
+  this.sanitizeHtml = dompurify.sanitize(marked(this.markdown))
+}
+
+this converts markdown to html and then purifies html to get rid of any malicious code 
